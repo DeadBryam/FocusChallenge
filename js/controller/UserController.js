@@ -12,19 +12,22 @@ class UserController extends AbstractController {
 
   findAllUsers() {
     return this.fetchResource(this.USER_URL).then(res => {
-      return res.map(map => {
-        return new User(map.id, map.name, 'female', []);
-      });
+      return Promise.all(res.map(map => {
+        return this.findGenderByName(map.name.split(' ')[0])
+          .then(gender => {
+            return new User(map.id, map.name, gender, []);
+          });
+      }));
     });
   };
 
-  getGender(name) {
+  findGenderByName(name) {
     return this.fetchResource(`${this.GENDER_URL}/?name=${name}&country_id=US`).then(res => {
       return res.gender;
     });
   };
 
-  setPostsToUser() {
+  findAllUserPosts() {
     return this.postConstroller.findAllPost()
       .then(res => {
         return this.findAllUsers()
